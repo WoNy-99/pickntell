@@ -1,0 +1,572 @@
+
+/* =============== [기본 스타일] =============== */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #ffd966 !important;
+}
+
+.wrapper {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+  
+
+.site-footer {
+  position: fixed;
+  bottom: 20px;          /* 살짝 위로 올림 */
+  left: 50%;             /* 가운데 정렬 */
+  transform: translateX(-50%);  /* 정확히 가운데 위치 */
+  font-size: 14px;
+  color: #666;
+  background: transparent;
+  width: max-content;
+  white-space: nowrap;
+  z-index: 999;
+}
+
+.site-footer p {
+  margin: 0;
+}
+
+.site-footer a {
+  color: #666;
+  text-decoration: none;
+  margin: 0 8px;
+}
+
+.site-footer a:hover {
+  text-decoration: underline;
+  color: #000;
+}
+/* =============== [사용설명서] =============== */
+
+ /* 질문 버튼 및 텍스트 컨테이너 */
+.question-container {
+    position: absolute;
+    top: 20px; /* 컨테이너 내부 상단 위치 */
+    right: -70px; /* 컨테이너 내부 우측 위치 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 기본 버튼 스타일 */
+.question-button {
+    width: 50px;
+    height: 50px;
+    background-image: url('img/question_icon.png');
+    background-size: cover; /* 이미지 크기를 버튼에 맞게 조정 */
+    background-position: center; /* 이미지를 가운데 정렬 */
+    cursor: pointer;
+    text-align: center;
+    line-height: 35px;
+}
+
+/* 확장된 팝업 스타일 */
+.question-button.open {
+    width: 250px; /* 팝업으로 확장 */
+    max-height: 400px; /* 초기 높이 */
+    height: auto; /* 텍스트에 따라 높이 조절 */
+    min-height: 60px; /* 최소 높이 설정 */
+    padding: 10px;
+    background-color: #fff;
+    text-align: left; /* 텍스트 정렬 */
+    border-radius: 10px; /* 팝업 형태 */
+    right: -220px;
+    background-image: none; /* 확장 시 이미지 제거 */
+    background-color: #fff; /* 배경색 변경 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: absolute;
+}
+
+.question-button h2, .question-button p, .question-text.hidden, .question-button button {
+    display: none; /* 기본적으로 숨김 */
+}
+
+.question-button.open h2, .question-button.open p, .question-button.open button {
+    display: block; /* 팝업 내용 표시 */
+}
+
+.question-button.open h2 {
+    font-size: 16px;
+    margin-bottom: 10px;
+    white-space: nowrap; /* 텍스트 잘림 방지 */
+}
+
+.question-button.open p {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 10px;
+    white-space: normal; /* 텍스트 줄바꿈 허용 */
+}
+
+/* 닫기 버튼 스타일 */
+.close-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: none;
+    border: none;
+    font-size: 30px;
+    cursor: pointer;
+    color: #333;
+}
+
+.close-button:hover {
+    color: #ff0000; /* 호버 시 닫기 버튼 색상 변경 */
+}
+
+.question-text {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+}
+
+/* =============== [컨테이너] =============== */
+.container {
+    width: 450px; /* 컨테이너 너비 */
+    background: #ffffff; /* 흰색 배경 */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+    border-radius: 10px; /* 모서리 둥글게 */
+    padding: 30px; 
+    position: relative;
+}
+
+.container h1 {
+    margin-bottom: 20px; /* 하단 간격 */
+    font-size: 32px;
+    color: #333333; /* 글자 색상 */
+    text-align: center; /* 중앙 정렬 */
+}
+
+/* =============== [폼 그룹: 나이, 성별, 장르] =============== */
+.form-group {
+    display: flex; /* 플렉스 박스 */
+    align-items: center; /* 수직 정렬 */
+    justify-content: space-between; /* 좌우 정렬 */
+    margin-bottom: 15px; /* 하단 간격 */
+}
+
+.form-group label {
+  font-size: 18px;
+    color: #333333; /* 라벨 색상 */
+    margin-right: 10px; /* 간격 */
+    flex: 1; /* 공간 차지 */
+    text-align: left; /* 좌측 정렬 */
+}
+
+.form-group input[type="number"] {
+    width: 150px;
+    height: 40px;
+    font-size: 16px;
+    padding: 5px;
+    border-radius: 10px; /* 모서리 둥글게 */
+    text-align: center;
+}
+
+.user-gender {
+    display: flex;
+    gap: 10px; /* 버튼 간격 */
+}
+
+.user-gender button {
+    width: 60px;
+    height: 40px;
+    font-size: 16px;
+    background-color: #f1f1f1; /* 기본 색 */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 6px;
+}
+
+.user-gender button:hover{
+  background-color: #e6e6e6; /* 원하는 배경색 */
+  color: #000; /* 텍스트 색상 */
+  border-color: #999; /* 테두리 색상 */
+}
+
+.user-gender button.active {
+    background-color: #333333; /* 활성화 색 */
+    color: white;
+}
+
+.form-group select {
+    width: 130px; /* 선택창 너비 */
+    height: 40px; /* 선택창 높이 */
+    padding: 5px;
+    border-radius: 10px; /* 모서리 둥글게 */
+    text-align: center; /* 텍스트 중앙 */
+}
+
+/* select 요소에 마우스 가져다 댔을 때 */
+.form-group select:hover {
+  background-color: #e6e6e6; /* 호버 시 배경색 */
+  cursor: pointer;
+}
+
+/* =============== [세부사항 버튼] =============== */
+.details {
+    font-size: 16px;
+    color: #555;
+    cursor: pointer;
+}
+
+
+.user-gender button:hover{
+  background-color: #e6e6e6; /* 원하는 배경색 */
+  
+  border-color: #999; /* 테두리 색상 */
+}
+
+.details:hover {
+    color: #000000; /* 텍스트 색상 */
+}
+
+/* =============== [구분선] =============== */
+.divider {
+    border-top: 1px solid #ccc; /* 선 색상 */
+    margin: 20px 0; /* 상하 간격 */
+}
+
+/* =============== [세부사항 영역] =============== */
+.extra-details {
+    display: none; /* 숨김 상태 */
+    margin-top: 20px; /* 상단 간격 */
+}
+
+/* =============== [등장인물] =============== */
+.character-section {
+    display: flex; /* 플렉스 사용 */
+    flex-direction: column; /* 세로 방향 */
+    gap: 10px; /* 간격 */
+}
+
+.character-row {
+    display: flex; /* 플렉스 */
+    align-items: center; /* 가운데 정렬 */
+    gap: 10px; /* 요소 간 간격 */
+    justify-content: flex-start; /* 왼쪽 정렬 */
+}
+
+.character-label {
+    font-size: 14px; /* 라벨 크기 */
+    width: 70px; /* 고정 너비 */
+    text-align: left;
+}
+
+.character-name {
+    width: 110px; /* 입력 필드 너비 */
+    height: 30px;
+    padding: 5px;
+    border-radius: 10px; /* 둥근 모서리 */
+}
+
+.character-gender {
+    display: flex;
+    gap: 10px; /* 버튼 간격 */
+}
+
+.character-gender button {
+    width: 50px; /* 버튼 너비 */
+    height: 35px; /* 버튼 높이 */
+    background-color: #f1f1f1; /* 기본 색 */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.character-gender button:hover{
+  background-color: #e6e6e6; /* 원하는 배경색 */
+  color: #000; /* 텍스트 색상 */
+  border-color: #999; /* 테두리 색상 */
+}
+
+.character-gender button.active {
+    background-color: #333333; /* 활성화 색 */
+    color: white;
+}
+
+.add-character, .remove-character {
+    width: 35px;
+    height: 35px;
+    font-size: 18px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    text-align: center;
+}
+
+.add-character:hover{
+  background-color: #e6e6e6; /* 원하는 배경색 */
+  color: #000; /* 텍스트 색상 */
+  border-color: #999; /* 테두리 색상 */
+}
+/* =============== [줄거리] =============== */
+.storyline {
+    width: 100%;
+    height: 80px;
+    resize: none; /* 크기 조절 비활성화 */
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-top: 5px;
+}
+
+/* =============== [하단 버튼] =============== */
+.action-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+/* 만들기 버튼 스타일 */
+button[type="submit"] {
+  width: 100px;
+  height: 40px;
+  font-size: 16px;
+  border: 1.5px solid;
+  border-radius: 8px; /* 모서리 둥글게 */
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease; /* 애니메이션 효과 */
+}
+
+button[type="submit"]:hover {
+  background-color: #353535; /* 호버 시 배경 색상 변경 */
+  color:#ccc;
+  transform: translateY(-2px); /* 호버 시 살짝 위로 이동 */
+}
+
+button[type="submit"]:active {
+  transform: translateY(0); /* 클릭 시 원래 위치로 */
+}
+
+/* 진동 효과 */
+@keyframes shake {
+  0% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+  }
+  60% {
+    transform: translate(2px, 2px);
+  }
+  80% {
+    transform: translate(2px, -2px);
+  }
+  100% {
+    transform: translate(0);
+  }
+}
+
+.shake {
+  animation: shake 0.2s ease-in-out 4 both;
+}
+
+input:invalid, select:invalid {
+  border: 2px solid #ff0000;
+}
+
+/* =============== [로딩] =============== */
+
+/* 로딩창 배경 */
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  
+  /* 로딩 애니메이션 컨테이너 */
+  .loading-animation {
+    text-align: center;
+  }
+  
+  /* 책 디자인 */
+.book {
+    position: relative;
+    width: 200px;
+    height: 260px;
+    background: linear-gradient(to bottom, #fefefe 0%, #f4f4f4 100%);
+    border-radius: 10px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: visible;
+    margin: 0 auto 20px;
+  }
+  
+  /* 페이지 디자인 */
+  .page {
+    position: absolute;
+    top: 15px;
+    left: 10px;
+    width: 180px;
+    height: 230px;
+    background: linear-gradient(to right, #ffffff 0%, #fafafa 70%, #f1f1f1 100%);
+    border-radius: 8px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    z-index: 1;
+  }
+  
+  .page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+      transparent 0,
+      transparent 20px,
+      rgba(0, 0, 0, 0.05) 21px,
+      rgba(0, 0, 0, 0.05) 22px
+    ); /* 페이지에 줄 추가 */
+    z-index: -1;
+  }
+  
+  /* 페이지 가장자리 효과 */
+  .book::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 5px;
+    width: 190px;
+    height: 240px;
+    background: linear-gradient(to left, #ddd 0%, transparent 100%);
+    border-radius: 8px;
+    z-index: 0;
+  }
+  
+  /* 책 중앙 접힘 효과 */
+  .book::after {
+    content: '';
+    position: absolute;
+    top: 5%;
+    left: 50%;
+    width: 2px;
+    height: 90%;
+    background: rgba(0, 0, 0, 0.1);
+    z-index: 2;
+  }
+  
+  /* 글씨 쓰는 효과 */
+  .writing {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* 연필 디자인 */
+  .pencil {
+    position: absolute;
+    top: 3px;
+    left: 8%;
+    width: 50px;
+    height: 50px;
+    background-image: url('img/pencil_icon.png');
+    background-size: cover;
+    background-position: center;
+    transform-origin: bottom center;
+    animation: pencil-move 7s linear infinite;
+    z-index: 10000; /* 가장 위로 설정 */
+  }
+  
+  /* 연필 움직임 애니메이션 */
+  @keyframes pencil-move {
+    0% {
+      top: -5%;
+      left: 8%;
+      transform: rotate(-10deg);
+    }
+    12.5% {
+      top: -5%;
+      left: 90%;
+      transform: rotate(0deg);
+    }
+    25% {
+      top: 20%;
+      left: 8%;
+      transform: rotate(-10deg);
+    }
+    37.5% {
+      top: 20%;
+      left: 90%;
+      transform: rotate(0deg);
+    }
+    50% {
+      top: 45%;
+      left: 8%;
+      transform: rotate(-10deg);
+    }
+    62.5% {
+      top: 45%;
+      left: 90%;
+      transform: rotate(0deg);
+    }
+    75% {
+      top: 70%;
+      left: 8%;
+      transform: rotate(-10deg);
+    }
+    87.5% {
+      top: 70%;
+      left: 90%;
+      transform: rotate(0deg);
+    }
+    100% {
+      top: 70%;
+      left: 90%;
+      transform: rotate(-5deg);
+    }
+  }
+
+/* 로딩 텍스트 애니메이션 */
+.loading-text {
+    font-size: 16px;
+    color: #333;
+    text-align: center;
+  }
+  
+  .dots::after {
+    content: ''; /* 초기 상태 */
+    animation: dots 4s steps(4, end) infinite;
+  }
+  
+  /* 점 증가 애니메이션 */
+@keyframes dots {
+    0% {
+      content: '';
+    }
+    25% {
+      content: '.';
+    }
+    50% {
+      content: '..';
+    }
+    75% {
+      content: '...';
+    }
+    100% {
+      content: '';
+    }
+  }

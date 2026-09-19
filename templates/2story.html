@@ -1,0 +1,544 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>동화책</title>
+  <style>
+    /* Body 스타일: 전체 페이지 설정 */
+    body {
+      margin: 0; /* 기본 여백 제거 */
+      padding: 0; /* 기본 패딩 제거 */
+      font-family: 'Arial', sans-serif; /* 기본 폰트 설정 */
+      background-color: #f9f5ec; /* 배경 색상 */
+      display: flex; /* 페이지 전체를 Flexbox로 정렬 */
+      justify-content: center; /* 수평 중앙 정렬 */
+      align-items: center; /* 수직 중앙 정렬 */
+      height: 100vh; /* 화면 전체 높이 */
+      user-select: none; /* 텍스트 선택 방지 */
+    }
+
+    /* 책 컨테이너 스타일 */
+    .book {
+      position: relative; /* 내부 요소의 절대 위치를 기준으로 설정 */
+      width: 80%; /* 책 전체 너비 */
+      height: 60%; /* 책 전체 높이 */
+      display: flex; /* 내부 요소를 가로로 정렬 */
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* 그림자 효과 */
+      background: linear-gradient(135deg, #f9f5ec 49.9%, #d9d9d9 50%); /* 책의 양쪽 색상 구분 */
+      border-radius: 20px; /* 둥근 모서리 */
+      overflow: hidden; /* 책을 벗어난 콘텐츠 숨김 */
+    }
+
+    /* 페이지 컨테이너: 왼쪽/오른쪽 페이지 */
+    .page {
+      display: flex; /* 내부 요소를 Flexbox로 정렬 */
+      height: 100%; /* 책의 전체 높이 */
+      flex-grow: 1; /* 너비를 자동으로 조정 */
+      overflow: hidden; /* 넘치는 콘텐츠 숨김 */
+    }
+
+    /* 왼쪽 페이지 (이미지 표시 영역) */
+    .left-page {
+      display: flex; /* 이미지 가운데 정렬 */
+      justify-content: center; /* 수평 중앙 정렬 */
+      align-items: center; /* 수직 중앙 정렬 */
+      background: #eef2ff; /* 페이지 배경 색상 */
+      width: 100%; /* 초기 너비 */
+    }
+
+    /* 왼쪽 페이지 이미지 스타일 */
+    .left-page img {
+      width: 100%; /* 이미지가 페이지에 맞도록 설정 */
+      height: auto; /* 원본 비율 유지 */
+      border-radius: 5px; /* 모서리 둥글게 */
+      pointer-events: all; /* 이미지 클릭 가능 */
+      cursor: pointer; /* 마우스 커서 표시 */
+    }
+
+    /* 드래그 가능한 구분선 */
+    .divider {
+      width: 5px; /* 구분선 너비 */
+      background: #ccc; /* 구분선 색상 */
+      cursor: ew-resize; /* 마우스 커서: 좌우 화살표 */
+    }
+
+    /* 오른쪽 페이지 (텍스트 표시 영역) */
+    .right-page {
+      display: flex; /* 텍스트 정렬 */
+      flex-direction: column; /* 수직 정렬 */
+      justify-content: center; /* 세로 중앙 정렬 */
+      align-items: center; /* 가로 중앙 정렬 */
+      background: #fff; /* 페이지 배경 색상 */
+      width: auto; /* 너비 자동 조정 */
+      overflow: hidden; /* 넘치는 텍스트 숨김 */
+      padding: 20px; /* 여백 */
+    }
+
+    /* 오른쪽 페이지의 텍스트 스타일 */
+    .right-page p {
+      margin: 0; /* 기본 여백 제거 */
+      font-size: 1.5vw; /* 텍스트 크기 */
+      text-align: center; /* 텍스트 중앙 정렬 */
+    }
+
+    /* 스피커 버튼 (오디오 버튼) */
+    .audio-button {
+    position: absolute; /* 고정 위치 */
+    top: 20px; /* 위쪽 여백 */
+    right: 20px; /* 오른쪽 여백 */
+    padding: 10px; /* 버튼 내부 여백 */
+    z-index: 10; /* 텍스트 위로 표시 */
+    font-size: 20px; /* 아이콘 크기 */
+    width: 50px; /* 버튼 크기 */
+    height: 50px; /* 버튼 크기 */
+    border-radius: 50%; /* 원형 버튼 */
+    background: #f5f5f5; /* 버튼 배경 */
+    border: 1px solid #ccc; /* 테두리 */
+    display: flex; /* 중앙 정렬 */
+    justify-content: center; /* 아이콘 수평 정렬 */
+    align-items: center; /* 아이콘 수직 정렬 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 그림자 효과 */
+    cursor: pointer; /* 클릭 가능한 마우스 커서 */
+    transition: transform 0.01s ease; /* 호버 및 클릭 효과 */
+    }
+
+    /* 재생 중일 때 동그란 배경 애니메이션 */
+    .audio-playing {
+    animation: pulse 1.5s infinite; /* 애니메이션 설정 */
+    }
+
+    @keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* 기본 상태 */
+        transform: scale(0.95); /* 기본 크기 */
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* 확장된 상태 */
+        transform: scale(1.05); /* 크기 확대 */
+    }
+    }
+    
+    /* 재생 제어 버튼 */
+    .control-buttons {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: none; /* 기본적으로 숨김 */
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* 재생 제어 버튼 스타일 */
+    .control-buttons button {
+    font-size: 20px; /* 아이콘 크기 */
+    width: 50px; /* 버튼 크기 */
+    height: 50px; /* 버튼 크기 */
+    border-radius: 50%; /* 원형 버튼 */
+    background: #f5f5f5; /* 버튼 배경 */
+    border: 1px solid #ccc; /* 테두리 */
+    display: flex; /* 중앙 정렬 */
+    justify-content: center; /* 아이콘 수평 정렬 */
+    align-items: center; /* 아이콘 수직 정렬 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 그림자 효과 */
+    cursor: pointer; /* 클릭 가능한 마우스 커서 */
+    transition: transform 0.01s ease; /* 호버 및 클릭 효과 */
+    }
+
+    .audio-button:hover,.control-buttons button:hover {
+    color: #ddd; /* 호버 시 아이콘 색상 */
+    }
+
+    .audio-button:active, .control-buttons button:active {
+    transform: scale(0.9); /* 클릭 시 살짝 축소 */
+    }
+
+    /* 페이지 이동 버튼 컨테이너 */
+    .page-buttons {
+      position: absolute; /* 고정 위치 */
+      bottom: 10px; /* 아래쪽 여백 */
+      width: 100%; /* 버튼이 페이지 전체를 차지 */
+      display: flex; /* 버튼을 가로로 정렬 */
+      justify-content: space-between; /* 좌우 버튼 분리 */
+    }
+
+    /* 페이지 이동 버튼 스타일 */
+    .page-buttons button {
+      background: #ccc; /* 버튼 배경 */
+      border: none; /* 테두리 없음 */
+      padding: 10px 20px; /* 버튼 크기 */
+      border-radius: 5px; /* 둥근 모서리 */
+      cursor: pointer; /* 클릭 가능한 마우스 커서 */
+      font-size: 16px; /* 글꼴 크기 */
+      transition: all 0.2s ease; /* 색상 변경 효과 */
+    }
+
+    /* 버튼 호버 효과 */
+    .page-buttons button:hover {
+      background: #999; /* 호버 시 색상 변경 */
+    }
+
+    /* 이미지 확대 모달 */
+    .modal {
+      position: fixed; /* 화면에 고정 */
+      top: 0; /* 위쪽 여백 없음 */
+      left: 0; /* 왼쪽 여백 없음 */
+      width: 100%; /* 전체 화면 너비 */
+      height: 100%; /* 전체 화면 높이 */
+      display: none; /* 기본적으로 숨김 */
+      justify-content: center; /* 중앙 정렬 */
+      align-items: center; /* 중앙 정렬 */
+      background: rgba(0, 0, 0, 0.8); /* 어두운 반투명 배경 */
+      backdrop-filter: blur(5px); /* 배경 블러 효과 */
+      z-index: 1000; /* 위로 올리기 */
+    }
+
+    /* 모달 내부 이미지 스타일 */
+    .modal img {
+      max-width: 80%; /* 최대 너비 */
+      max-height: 80%; /* 최대 높이 */
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* 그림자 효과 */
+    }
+
+    /* 이미지 다운로드 버튼 */
+    .modal .download-button {
+      position: absolute; /* 고정 위치 */
+      bottom: 20px; /* 아래쪽 여백 */
+      right: 20px; /* 오른쪽 여백 */
+      background: #fff; /* 버튼 배경 */
+      padding: 10px 20px; /* 버튼 내부 여백 */
+      border-radius: 5px; /* 둥근 모서리 */
+      font-size: 16px; /* 텍스트 크기 */
+      text-decoration: none; /* 밑줄 제거 */
+      color: #333; /* 텍스트 색상 */
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* 그림자 효과 */
+      cursor: pointer; /* 클릭 가능한 마우스 커서 */
+    }
+
+    /* 다운로드 버튼 호버 효과 */
+    .modal .download-button:hover {
+      background: #f0f0f0; /* 호버 시 밝은 배경 */
+    }
+
+    /* 모달 닫기 버튼 */
+    .modal .close {
+      position: absolute; /* 고정 위치 */
+      top: 20px; /* 위쪽 여백 */
+      right: 20px; /* 오른쪽 여백 */
+      font-size: 24px; /* 닫기 버튼 크기 */
+      color: white; /* 닫기 버튼 색상 */
+      cursor: pointer; /* 클릭 가능한 마우스 커서 */
+    }
+
+    /* 분기 선택지 버튼 */
+    #choices { margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+    #choices button { background:#6c5ce7; color:#fff; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-size:1vw; }
+    #choices button:hover { background:#5a4abd; }
+
+    /* 로딩 오버레이 */
+    #loading-overlay {
+      display: none;
+      position: fixed; top:0; left:0;
+      width:100%; height:100%;
+      background: rgba(255,255,255,0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    }
+
+    /* 토론 카드 */
+    #discussion-cards {
+      display: none;
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f0f8ff;
+      border-radius: 8px;
+    }
+    #discussion-cards h3 {
+      margin-top: 0;
+    }
+    #discussion-cards ul {
+      list-style: disc inside;
+      padding-left: 1rem;
+    }
+
+  </style>
+</head>
+<body>
+  <audio id="bgm" 
+        src="{% static 'audios/sample.mp3' %}"
+        preload="auto">
+    브라우저가 audio 태그를 지원하지 않습니다.
+  </audio>
+  <p class="public-audio-notice">공개본 배경음은 개인정보가 없는 4초 합성 테스트음입니다. 실제 음성 복제·동화 낭독 샘플이 아니며 자동 재생하지 않습니다.</p>
+  <!-- 로딩 오버레이 -->
+  <div id="loading-overlay">
+    <div style="
+      padding:2rem; background:#fff;
+      border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.2);
+    ">
+      <p>잠시만 기다려주세요...</p>
+    </div>
+  </div>
+
+  <div class="book">
+    <div class="page">
+      <div class="left-page">
+        <img id="page-image" src="{{ pages.0.image }}" alt="동화 이미지" onclick="openModal()">
+      </div>
+      <div class="divider" onmousedown="startResizing(event)"></div>
+      <div class="right-page">
+        <p id="page-text">{{ pages.0.text }}</p>
+        <div id="choices"></div>
+      </div>
+    </div>
+
+    <div class="page-buttons">
+      <button id="prev-button" onclick="prevPage()">◀ 이전 페이지</button>
+      <button id="next-button" onclick="nextPage()">다음 페이지 ▶</button>
+    </div>
+
+    <div id="discussion-cards" style="display:none; margin-top:2rem; padding:1rem; background:#f0f8ff; border-radius:8px;">
+      <h3>함께 이야기해볼까요?</h3>
+      <ul id="cards-list" style="list-style:disc inside;"></ul>
+    </div>
+
+    <button class="audio-button" id="audioButton" onclick="toggleAudio()">🕪</button>
+    <div class="control-buttons" id="controlButtons">
+      <button onclick="resumeAudio()">⏯︎</button>
+      <button onclick="restartAudio()">🗘</button>
+    </div>
+  </div>
+
+  <div class="modal" id="modal">
+    <span class="close" onclick="closeModal()">×</span>
+    <img id="modal-image" src="{{ pages.0.image }}" alt="확대된 동화 이미지">
+    <a id="download-link" href="{{ pages.0.image }}" download class="download-button">이미지 다운로드</a>
+  </div>
+
+  <audio id="page-audio" src="{{ pages.0.audio }}"></audio>
+
+  <script>
+    const userInfo = {{ user_info|safe }};
+
+    // CSRF 토큰 추출 헬퍼
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+          cookie = cookie.trim();
+          if (cookie.startsWith(name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    let isResizing = false;
+    const minWidth = 100, dividerWidth = 5, minFontSize = 1, maxFontSize = 3;
+    const audio = document.getElementById('page-audio');
+    const audioButton = document.getElementById('audioButton');
+    const controlButtons = document.getElementById('controlButtons');
+    let isPlaying = false;
+
+    // 서버에서 넘겨준 current_page, pages
+    let currentPage = {{ current_page|default:0 }};
+    const pages     = {{ pages|safe }};
+
+    // ① 세션에 current_idx 저장
+    async function setCurrent(idx) {
+      await fetch('/create/set_current/', {
+        method: 'POST',
+        headers: {
+          'Content-Type':'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ page_index: idx })
+      });
+    }
+
+    function updatePage() {
+      const page = pages[currentPage];
+      const prevBtn       = document.getElementById('prev-button');
+      const nextBtn       = document.getElementById('next-button');
+      const choicesDiv    = document.getElementById('choices');
+      const cardContainer = document.getElementById('discussion-cards');
+      const list          = document.getElementById('cards-list');
+    
+      // ── 1) 토론 카드 페이지일 때 ──
+      if (page.cards) {
+        // 1-1) 스토리 영역 숨기기
+        document.querySelector('.left-page').style.display      = 'none';
+        document.querySelector('.right-page p').style.display   = 'none';
+        // 선택지가 있을 때만 보이게
+        if (page.choices) {
+          choicesDiv.style.display = 'flex';
+        } else {
+          choicesDiv.style.display = 'none';
+        }
+  
+
+        // 1-2) 이전/다음 버튼만 조절
+        prevBtn.style.display = currentPage > 0 ? 'block' : 'none';
+        nextBtn.style.display = currentPage < pages.length - 1 ? 'block' : 'none';
+    
+        // 1-3) 카드 리스트 그리기
+        list.innerHTML = '';
+        page.cards.forEach(c => {
+          const li = document.createElement('li');
+          li.textContent = c.q;
+          list.appendChild(li);
+        });
+        cardContainer.style.display = 'block';
+        return;
+      }
+    
+      // ── 2) 일반 스토리 페이지일 때 ──
+      cardContainer.style.display                       = 'none';
+      document.querySelector('.left-page').style.display = 'flex';
+      document.querySelector('.right-page p').style.display = 'block';
+      choicesDiv.style.display                          = 'flex';
+    
+      // 텍스트·이미지·오디오 업데이트
+      document.getElementById('page-text').textContent = page.text;
+      document.getElementById('page-image').src         = page.image;
+      audio.src                                         = page.audio;
+    
+      if (page.choices) {
+        prevBtn.style.display = currentPage > 0 ? 'block' : 'none';
+        nextBtn.style.display = 'none';
+        choicesDiv.innerHTML  = '';
+        page.choices.forEach((c, idx) => {
+          const btn = document.createElement('button');
+          btn.textContent = c.label;
+          btn.onclick     = () => chooseBranch(idx);
+          choicesDiv.appendChild(btn);
+        });
+      } else {
+        prevBtn.style.display = currentPage > 0 ? 'block' : 'none';
+        nextBtn.style.display = currentPage < pages.length - 1 ? 'block' : 'none';
+        choicesDiv.innerHTML  = '';
+      }
+    
+      history.replaceState(null, '', `/create/${currentPage}`);
+    }
+
+
+    function prevPage() {
+      if (currentPage > 0) {
+        currentPage--;
+        updatePage();
+        setCurrent(currentPage);
+      }
+    }
+    function nextPage() {
+      if (currentPage < pages.length - 1) {
+        currentPage++;
+        updatePage();
+        setCurrent(currentPage);
+      }
+    }
+
+    updatePage();
+
+    async function chooseBranch(choiceIndex) {
+      const overlay = document.getElementById('loading-overlay');
+      overlay.style.display = 'flex';
+    
+      try {
+        const payload = { choice_index: choiceIndex, ...userInfo };
+        const res = await fetch('/create/branch/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+          },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+    
+        // ── 여기를 통째로 교체하세요 ──
+    
+        // 1) 안전하게 선택지 삭제
+        if (pages[currentPage] && pages[currentPage].choices) {
+          delete pages[currentPage].choices;
+        }
+    
+        // 2) 새로운 스토리 페이지 삽입
+        const insertAt = currentPage + 1;
+        pages.splice(insertAt, 0, ...data.new_pages);
+    
+        // 3) 두 번째 분기 끝나면 토론 카드 삽입
+        if (Array.isArray(data.cards) && data.cards.length) {
+          pages.splice(
+            insertAt + data.new_pages.length,
+            0,
+            { cards: data.cards }
+          );
+        }
+    
+        // 4) 현재 페이지 인덱스를 “첫 번째 새 페이지”로 이동
+        currentPage = insertAt;
+        updatePage();
+        await setCurrent(currentPage);
+    
+        // ── 여기까지 ──
+    
+      } catch (e) {
+        alert(e.message);
+      } finally {
+        overlay.style.display = 'none';
+      }
+    }
+
+    function openModal() {
+      const modal = document.getElementById('modal');
+      document.getElementById('modal-image').src = pages[currentPage].image;
+      document.getElementById('download-link').href = pages[currentPage].image;
+      modal.style.display = 'flex';
+    }
+    function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+    function toggleAudio() {
+      if (isPlaying) {
+        audio.pause(); isPlaying=false; audioButton.innerHTML='🕪'; audioButton.classList.remove('audio-playing'); audioButton.style.display='none'; controlButtons.style.display='flex';
+      } else {
+        audio.play(); isPlaying=true; audioButton.innerHTML='⏯︎'; audioButton.classList.add('audio-playing');
+      }
+    }
+    function resumeAudio() { audio.play(); isPlaying=true; controlButtons.style.display='none'; audioButton.style.display='block'; audioButton.classList.add('audio-playing'); }
+    function restartAudio(){ audio.currentTime=0; audio.play(); isPlaying=true; controlButtons.style.display='none'; audioButton.style.display='block'; audioButton.classList.add('audio-playing'); }
+    audio.addEventListener('ended',()=>{ isPlaying=false; audioButton.innerHTML='🕪'; audioButton.classList.remove('audio-playing'); });
+
+    function startResizing(event) {
+      isResizing=true;
+      document.addEventListener('mousemove', resize);
+      document.addEventListener('mouseup', stopResizing);
+      event.preventDefault();
+    }
+    function resize(event) {
+      if (!isResizing) return;
+      const book=document.querySelector('.book');
+      const leftPage=document.querySelector('.left-page');
+      const rightPage=document.querySelector('.right-page');
+      const textContent=document.getElementById('page-text');
+      const rect=book.getBoundingClientRect();
+      const offsetX=event.clientX-rect.left;
+      const leftW=Math.max(minWidth,Math.min(offsetX,rect.width-minWidth-dividerWidth));
+      leftPage.style.width=`${leftW}px`;
+      rightPage.style.width=`${rect.width-leftW-dividerWidth}px`;
+      const fontSize=Math.max(minFontSize,Math.min(maxFontSize,(rightPage.offsetWidth/rect.width)*maxFontSize));
+      textContent.style.fontSize=`${fontSize}vw`;
+    }
+    function stopResizing(){isResizing=false; document.removeEventListener('mousemove',resize); document.removeEventListener('mouseup',stopResizing);}
+
+    // Public archive: the synthetic sample is not automatically played.
+  </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+# 민감한 파일 제외
+config.env
+db.sqlite3
+
+# 사진 제외
+/media
+/.vscode
+
+# 디버깅용 제외
+story.json
+image.json
+audio.json
+__pycache__/
+*.py[cod]
+.venv/
+*.pem
+*.key
+*.p12
+*.pfx
+.DS_Store
+
+
+# Public archive: local credentials, databases, and personal working files
+.env
+.env.*
+*.env
+config.env
+!*.env.example
+!.env.example
+!.env.*.example
+!config.env.example
+*.db
+*.sqlite*
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*service-account*.json
+*credentials*.json
+google-services.json
+__pycache__/
+*.py[cod]
+*.log

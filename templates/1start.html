@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./static/vars.css">
+    <link rel="stylesheet" href="./static/style.css">
+    <title>Pick & Tell</title>
+    </head>
+
+    <body>
+    <div class="wrapper">
+
+    <!-- 컨테이너 -->
+    <div class="container" style="position: relative;">
+        <!-- 질문 버튼 및 텍스트 -->
+        <div class="question-container">
+            <div class="question-button" onclick="togglePopup()">
+                <button class="close-button" onclick="togglePopup(event)">×</button>
+                <h2>사용 설명서</h2>
+                <p>필수 입력 : 사용자의 나이, 성별, 원하는 장르<br>
+                    세부사항을 통해 동화 이야기를 맞춤 설정할 수 있습니다.<br>
+                    추가 입력 : 등장인물의 이름, 성별, 줄거리
+                </p>
+            </div>
+            <span class="question-text" id="questionText">사용설명서</span>
+        </div>
+        <!-- 제목 -->
+        <h1>Pick & Tell</h1>
+
+        <!-- 폼 -->
+        <form action="/create/" method="post">
+            {% csrf_token %}
+            <!-- 나이 입력 -->
+            <div class="form-group">
+                <label for="age">나이</label>
+                <input type="number" id="age" name="age" min="1" max="100">
+            </div>
+
+            <!-- 성별 선택 -->
+            <div class="form-group">
+                <label>성별</label>
+                <div class="user-gender">
+                    <!-- 남자 버튼 -->
+                    <button type="button" id="mainmale" onclick="selectMainGender('male')">남</button>
+                    <!-- 여자 버튼 -->
+                    <button type="button" id="mainfemale" onclick="selectMainGender('female')">여</button>
+                </div>
+                <!-- 선택된 성별 정보를 저장할 hidden input -->
+                <input type="hidden" id="gender" name="gender" value="">
+            </div>
+
+            <!-- 장르 선택 -->
+            <div class="form-group">
+                <label for="genre">장르</label>
+                <select id="genre" name="genre">
+                    <option value="" disabled selected>선택하세요</option>
+                    <option value="fantasy">판타지</option>
+                    <option value="adventure">모험</option>
+                    <option value="sf">SF</option>
+                    <option value="romance">로맨스</option>
+                </select>
+            </div>
+
+            <!-- 구분선 -->
+            <div class="divider"></div>
+
+            <!-- 세부사항 -->
+            <div class="extra-details" id="extraDetails">
+                <!-- 등장인물 -->
+                <div class="character-section" id="characterSection">
+                    <div class="character-row">
+                        <label class="character-label">등장인물</label>
+                        <input type="text" class="character-name" name="character_name[]" placeholder="이름">
+                        <div class="character-gender">
+                            <button type="button" onclick="selectGender(this)">남</button>
+                            <button type="button" onclick="selectGender(this)">여</button>
+                        </div>
+                        <input type="hidden" name="character_gender[]" value="">
+                        <button type="button" class="add-character" onclick="addCharacter()">+</button>
+                    </div>
+                </div>
+                <br>
+                <div>
+                    <label for="storyline">줄거리</label>
+                    <textarea id="storyline" class="storyline" placeholder="줄거리를 입력하세요"></textarea>
+                </div>
+            </div>
+
+            <!-- 버튼 -->
+            <div class="action-buttons">
+                <p class="details" id="detailsToggle" name="storyline" onclick="toggleDetails()">+ 세부사항</p>
+                <button type="submit">만들기!</button>
+            </div>
+        </form>
+        
+
+        <!-- 로딩창 -->
+        <div id="loading-screen" style="display: none;">
+            <div class="loading-animation">
+            <div class="book">
+                <div class="page">
+                <div class="writing"></div>
+                </div>
+                <div class="pencil"></div>
+            </div>
+            <p>이야기를 쓰고 있어요<span class="dots"></span></p>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- 푸터 -->
+    <footer class="site-footer">
+    <p>© 동하나라 서현공주     
+        <a href="/privacy">Privacy Policy</a>     
+        <a href="/terms">Terms & Conditions</a>
+    </p>
+    </footer>
+
+<!-- 스크립트: 동작 정의 -->
+    <script>
+        /**
+        * 선택된 성별을 hidden input에 저장하고 버튼 스타일을 업데이트하는 함수
+        * @param {string} genderValue - 선택된 성별 값 ('male' 또는 'female')
+        */
+        function selectMainGender(genderValue) {
+            // hidden input에 값 설정
+            document.getElementById('gender').value = genderValue;
+
+            // 버튼 스타일 업데이트
+            document.getElementById('mainmale').classList.remove('active');
+            document.getElementById('mainfemale').classList.remove('active');
+            if (genderValue === 'male') {
+                document.getElementById('mainmale').classList.add('active');
+            } else if (genderValue === 'female') {
+                document.getElementById('mainfemale').classList.add('active');
+            }
+        }
+
+        /**
+        * 등장인물 성별 버튼 독립적으로 선택
+        * @param {HTMLElement} button - 클릭된 버튼
+        */
+        function selectGender(button) {
+            const siblings = button.parentNode.querySelectorAll('button'); // 같은 부모 안의 버튼 찾기
+            siblings.forEach(btn => btn.classList.remove('active')); // 모든 버튼에서 'active' 제거
+            button.classList.add('active'); // 클릭된 버튼에 'active' 추가
+
+            // 성별 값을 hidden input에 설정
+            const hiddenInput = button.parentNode.querySelector('input[type="hidden"]');
+            hiddenInput.value = button.textContent === '남' ? 'male' : 'female';
+        }
+
+        /**
+        * 세부사항 영역 표시/숨기기
+        */
+        function toggleDetails() {
+            const extraDetails = document.getElementById('extraDetails'); // 세부사항 영역 찾기
+            const detailsToggle = document.getElementById('detailsToggle'); // 세부사항 버튼 찾기
+            if (extraDetails.style.display === 'none' || extraDetails.style.display === '') {
+                extraDetails.style.display = 'block'; // 세부사항 표시
+                detailsToggle.textContent = '- 세부사항'; // 버튼 텍스트 변경
+            } else {
+                extraDetails.style.display = 'none'; // 세부사항 숨기기
+                detailsToggle.textContent = '+ 세부사항'; // 버튼 텍스트 변경
+            }
+        }
+
+        /**
+        * 새로운 등장인물 추가
+        */
+        function addCharacter() {
+            const characterSection = document.getElementById('characterSection'); // 등장인물 섹션 찾기
+
+            // 이전 "+" 버튼을 "-" 버튼으로 변경
+            const prevAddCharacterBtn = document.querySelector('.add-character');
+            if (prevAddCharacterBtn) {
+                prevAddCharacterBtn.textContent = '-';
+                prevAddCharacterBtn.onclick = function () {
+                    const parentRow = this.parentNode; // 현재 row
+                    parentRow.remove(); // 현재 등장인물 row 제거
+                    updateFirstCharacterLabel(); // 첫 번째 등장인물 라벨 업데이트
+                };
+                prevAddCharacterBtn.classList.add('remove-character'); // "-" 관련 클래스 추가
+                prevAddCharacterBtn.classList.remove('add-character'); // "+" 관련 클래스 제거
+            }
+
+            // 새로운 등장인물 입력 필드 생성
+            const newCharacter = document.createElement('div');
+            newCharacter.classList.add('character-row'); // 클래스 추가
+            newCharacter.innerHTML = `
+                <label class="character-label"></label> <!-- 등장인물 라벨 -->
+                <input type="text" class="character-name" name="character_name[]" placeholder="이름"> <!-- 이름 입력창 -->
+                <div class="character-gender">
+                    <!-- 성별 버튼: 남성 -->
+                    <button type="button" onclick="selectGender(this)">남</button>
+                    <!-- 성별 버튼: 여성 -->
+                    <button type="button" onclick="selectGender(this)">여</button>
+                </div>
+                <input type="hidden" name="character_gender[]" value=""> <!-- 성별 값 전달 -->
+                <button type="button" class="add-character" onclick="addCharacter()">+</button> <!-- 새 "+" 버튼 -->
+            `;
+
+            // 새로운 입력 필드 추가
+            characterSection.appendChild(newCharacter);
+        }
+
+        /**
+        * 첫 번째 줄 '등장인물' 라벨 복원
+        */
+        function updateFirstCharacterLabel() {
+            const characterRows = document.querySelectorAll('.character-row'); // 모든 등장인물 row
+            if (characterRows.length > 0) {
+                const firstRow = characterRows[0]; // 첫 번째 row 가져오기
+                const label = firstRow.querySelector('.character-label'); // 라벨 찾기
+                if (label) {
+                    label.textContent = '등장인물'; // 라벨 텍스트 설정
+                }
+            }
+        }
+
+        // 팝업 표시/숨기기 토글
+        function togglePopup(event) {
+            
+                if (event) {
+                    event.stopPropagation();
+                }
+
+                const button = document.querySelector('.question-button');
+                const text = document.getElementById('questionText');
+
+                // 팝업 열림/닫힘 상태 변경
+                button.classList.toggle('open');
+                text.classList.toggle('hidden');
+        }
+        //필수 입력 경고창 부분
+        document.querySelector('form').addEventListener('submit', function (event) {
+            const ageField = document.getElementById('age');
+            const genderField = document.getElementById('gender');
+            const genreField = document.getElementById('genre');
+            let valid = true;
+        
+            // 유효성 검사 및 진동 효과 적용
+            if (!ageField.value) {
+                applyShakeEffect(ageField);
+                valid = false;
+            }
+            if (!genderField.value) {
+                applyShakeEffect(document.querySelector('.user-gender'));
+                valid = false;
+            }
+            if (!genreField.value) {
+                applyShakeEffect(genreField);
+                valid = false;
+            }
+        
+            if (!valid) {
+                event.preventDefault(); // 폼 제출 중단
+                return;
+            }
+        
+            // 모든 필수 입력값이 입력된 경우 로딩창 표시
+            showLoadingScreen();
+        });
+        // 여기에 추가 ↓
+        document.querySelector('button[type="submit"]').addEventListener('click', () => {
+            const bgm = document.getElementById('bgm');
+            if (bgm && bgm.paused) {
+            bgm.play();
+            }
+        });
+    
+        // 로딩 화면 표시 함수
+        function showLoadingScreen() {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                loadingScreen.style.display = 'flex';
+            }
+        }
+    
+        function hideLoadingScreen() {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                loadingScreen.style.display = 'none';
+            }
+        }
+    
+        // 진동 효과를 적용하는 함수
+        function applyShakeEffect(element) {
+            element.classList.add('shake');
+            setTimeout(() => {
+                element.classList.remove('shake');
+            }, 500); // 0.5초 후 진동 클래스 제거
+        }
+
+            
+        </script>
+    </body>
+</html>
